@@ -6,6 +6,7 @@ ACard
 AClient
 ACo
 ADK
+AError
 ARequest
 ASED
 AServer
@@ -18,11 +19,13 @@ EUR
 EUg
 FBT
 GBP
+GVsb
 Genkit
 Ghw
 IFdvcmxk
 INR
 JHv
+JPY
 JWKS
 JWTs
 KGgo
@@ -48,8 +51,10 @@ Xca
 YTT
 YWFh
 Zipkin
+aacacac
 aboutasha
 achat
+aconnect
 adk
 agentcard
 agentic
@@ -65,15 +70,21 @@ backstory
 backticks
 bbb
 bzr
+cae
 ccc
 cdn
 cfe
 cls
 coc
+codegen
 crewai
+datamodel
 datapart
+dcda
 direnv
+efbd
 evt
+excinfo
 firewalls
 flightbook
 fsv
@@ -91,6 +102,7 @@ gweb
 iat
 ietf
 inbox
+inmemory
 iss
 jherr
 jti
@@ -136,6 +148,7 @@ stateclass
 styleguide
 svn
 systemctl
+tagwords
 taskssend
 taskstate
 taskstatus
@@ -151,4 +164,5 @@ webpage
 whatwg
 wikipedia
 wsgi
+xxxxx
 youtube
