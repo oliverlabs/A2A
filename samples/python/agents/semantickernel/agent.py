@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -11,6 +12,7 @@ from pydantic import BaseModel
 from semantic_kernel.agents import ChatCompletionAgent, ChatHistoryAgentThread
 from semantic_kernel.connectors.ai.open_ai import (
     AzureChatCompletion,
+    OpenAIChatCompletion,
     OpenAIChatPromptExecutionSettings,
 )
 from semantic_kernel.contents import (
@@ -19,9 +21,7 @@ from semantic_kernel.contents import (
     StreamingChatMessageContent,
     StreamingTextContent,
 )
-from semantic_kernel.functions import kernel_function
-from semantic_kernel.functions.kernel_arguments import KernelArguments
-
+from semantic_kernel.functions import KernelArguments, kernel_function
 
 if TYPE_CHECKING:
     from semantic_kernel.contents import ChatMessageContent
@@ -119,8 +119,7 @@ class SemanticKernelTravelAgent:
             if not api_key:
                 raise ValueError('OPENAI_API_KEY environment variable must be set when not using Azure OpenAI.')
             
-            endpoint = os.getenv('OPENAI_ENDPOINT', None)
-            deployment_name = os.getenv('OPENAI_MODEL', 'gpt-4o')
+            model_id = os.getenv('OPENAI_CHAT_MODEL_ID', 'gpt-4.1')
 
         # Define a CurrencyExchangeAgent to handle currency-related tasks
         # Configure AzureChatCompletion service based on our settings
@@ -133,12 +132,10 @@ class SemanticKernelTravelAgent:
                 api_version=api_version,
             )
         else:
-            chat_service = AzureChatCompletion(
-                deployment_name=deployment_name,  # Using the model name as deployment name
+            # For standard OpenAI, use OpenAIChatCompletion with the correct model name
+            chat_service = OpenAIChatCompletion(
+                ai_model_id=model_id,
                 api_key=api_key,
-                endpoint=endpoint if endpoint else "https://api.openai.com",
-                use_azure_active_directory=False,
-                api_version=None,  # Use OpenAI's default API version
             )
             
         currency_exchange_agent = ChatCompletionAgent(
