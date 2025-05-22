@@ -1,8 +1,6 @@
 # OpenAI configurations
 OPENAI_API_KEY="<example>"
 OPENAI_CHAT_MODEL_ID="gpt-4o"
-# Optional: Custom endpoint (leave empty for OpenAI's default endpoint)
-OPENAI_ENDPOINT=""
 
 # Azure OpenAI configuration (defaults to Azure OpenAI)
 ENABLE_AZURE_OPENAI="true"
