@@ -53,12 +53,31 @@ sequenceDiagram
 cd samples/python/agents/semantickernel
 ```
 
-2. **Create an environment file (.env) with your API key and the model ID (e.g., "gpt-4.1"):**:
+2. **Create an environment file (.env) with your configuration:**
+
+For standard OpenAI:
 
 ```bash
+# Standard OpenAI configuration
+ENABLE_AZURE_OPENAI="false"
 OPENAI_API_KEY="your_api_key_here"
-OPENAI_CHAT_MODEL_ID="your-model-id"
+OPENAI_MODEL="gpt-4o"
+# Optional: Custom endpoint (leave empty for OpenAI's default endpoint)
+OPENAI_ENDPOINT=""
 ```
+
+For Azure OpenAI:
+
+```bash
+# Azure OpenAI configuration
+ENABLE_AZURE_OPENAI="true"
+AZURE_OPENAI_API_KEY="your_azure_api_key_here"
+AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com/"
+AZURE_OPENAI_DEPLOYMENT_NAME="your-deployment-name"
+AZURE_OPENAI_API_VERSION="2024-12-01-preview"  # Set to your desired API version
+```
+
+> **Note**: For simplicity, this implementation uses `AzureChatCompletion` for both Azure and standard OpenAI configurations. When `ENABLE_AZURE_OPENAI="false"`, the service is configured to work with standard OpenAI endpoints.
 
 3. **Set up the Python Environment**:
 

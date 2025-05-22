@@ -93,26 +93,56 @@ class SemanticKernelTravelAgent:
     SUPPORTED_CONTENT_TYPES = ['text', 'text/plain']
 
     def __init__(self):
-        # Azure OpenAI credentials
-        api_key = os.getenv('AZURE_OPENAI_API_KEY', None)
-        if not api_key:
-            raise ValueError('AZURE_OPENAI_API_KEY environment variable not set.')
+        # Check if Azure OpenAI should be used
+        use_azure = os.getenv('ENABLE_AZURE_OPENAI', 'false').lower() == 'true'
         
-        endpoint = os.getenv('AZURE_OPENAI_ENDPOINT', None)
-        if not endpoint:
-            raise ValueError('AZURE_OPENAI_ENDPOINT environment variable not set.')
-        
-        deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', None)
-        if not deployment_name:
-            raise ValueError('AZURE_OPENAI_DEPLOYMENT_NAME environment variable not set.')
+        # Get API key based on selected service type
+        if use_azure:
+            api_key = os.getenv('AZURE_OPENAI_API_KEY', None)
+            if not api_key:
+                raise ValueError('AZURE_OPENAI_API_KEY environment variable must be set when using Azure OpenAI.')
+            
+            endpoint = os.getenv('AZURE_OPENAI_ENDPOINT', None)
+            if not endpoint:
+                raise ValueError('AZURE_OPENAI_ENDPOINT environment variable must be set when using Azure OpenAI.')
+            
+            deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', None)
+            if not deployment_name:
+                raise ValueError('AZURE_OPENAI_DEPLOYMENT_NAME environment variable must be set when using Azure OpenAI.')
+                
+            # API version is recommended but not required (will use default if not specified)
+            api_version = os.getenv('AZURE_OPENAI_API_VERSION', None)
+            if not api_version:
+                logger.warning('AZURE_OPENAI_API_VERSION not set, using default API version.')
+        else:
+            api_key = os.getenv('OPENAI_API_KEY', None)
+            if not api_key:
+                raise ValueError('OPENAI_API_KEY environment variable must be set when not using Azure OpenAI.')
+            
+            endpoint = os.getenv('OPENAI_ENDPOINT', None)
+            deployment_name = os.getenv('OPENAI_MODEL', 'gpt-4o')
 
         # Define a CurrencyExchangeAgent to handle currency-related tasks
-        currency_exchange_agent = ChatCompletionAgent(
-            service=AzureChatCompletion(
+        # Configure AzureChatCompletion service based on our settings
+        chat_service = None
+        if use_azure:
+            chat_service = AzureChatCompletion(
                 deployment_name=deployment_name,
                 api_key=api_key,
                 endpoint=endpoint,
-            ),
+                api_version=api_version,
+            )
+        else:
+            chat_service = AzureChatCompletion(
+                deployment_name=deployment_name,  # Using the model name as deployment name
+                api_key=api_key,
+                endpoint=endpoint if endpoint else "https://api.openai.com",
+                use_azure_active_directory=False,
+                api_version=None,  # Use OpenAI's default API version
+            )
+            
+        currency_exchange_agent = ChatCompletionAgent(
+            service=chat_service,
             name='CurrencyExchangeAgent',
             instructions=(
                 'You specialize in handling currency-related requests from travelers. '
@@ -125,11 +155,7 @@ class SemanticKernelTravelAgent:
 
         # Define an ActivityPlannerAgent to handle activity-related tasks
         activity_planner_agent = ChatCompletionAgent(
-            service=AzureChatCompletion(
-                deployment_name=deployment_name,
-                api_key=api_key,
-                endpoint=endpoint,
-            ),
+            service=chat_service,
             name='ActivityPlannerAgent',
             instructions=(
                 'You specialize in planning and recommending activities for travelers. '
@@ -142,11 +168,7 @@ class SemanticKernelTravelAgent:
 
         # Define the main TravelManagerAgent to delegate tasks to the appropriate agents
         self.agent = ChatCompletionAgent(
-            service=AzureChatCompletion(
-                deployment_name=deployment_name,
-                api_key=api_key,
-                endpoint=endpoint,
-            ),
+            service=chat_service,
             name='TravelManagerAgent',
             instructions=(
                 "Your role is to carefully analyze the traveler's request and forward it to the appropriate agent based on the "
